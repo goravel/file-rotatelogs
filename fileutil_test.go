@@ -1,13 +1,14 @@
-package fileutil_test
+package rotatelogs
 
 import (
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
-	"github.com/jonboulle/clockwork"
-	"github.com/lestrrat-go/strftime"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/goravel/file-rotatelogs/v2/strftime"
 )
 
 func TestGenerateFn(t *testing.T) {
@@ -22,8 +23,7 @@ func TestGenerateFn(t *testing.T) {
 		if !assert.NoError(t, err, `strftime.New should succeed`) {
 			return
 		}
-		clock := clockwork.NewFakeClockAt(xt)
-		fn := GenerateFn(pattern, clock, 24*time.Hour)
+		fn := GenerateFn(pattern, NewClock(xt), 24*time.Hour)
 		expected := fmt.Sprintf("/path/to/%04d/%02d/%02d",
 			xt.Year(),
 			xt.Month(),
@@ -34,4 +34,11 @@ func TestGenerateFn(t *testing.T) {
 			return
 		}
 	}
+}
+
+func TestCreateFileSuccess(t *testing.T) {
+	file, err := CreateFile("testfile.log")
+	assert.NoError(t, err)
+	assert.NoError(t, file.Close())
+	assert.NoError(t, os.Remove("testfile.log"))
 }

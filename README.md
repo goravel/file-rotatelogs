@@ -5,9 +5,12 @@ file-rotatelogs
 
 Provide an `io.Writer` that periodically rotates log files from within the application. Port of [File::RotateLogs](https://metacpan.org/release/File-RotateLogs) from Perl to Go.
 
-[![Build Status](https://travis-ci.org/lestrrat-go/file-rotatelogs.png?branch=master)](https://travis-ci.org/lestrrat-go/file-rotatelogs)
+[![Go Doc](https://godoc.org/github.com/goravel/file-rotatelogs?status.svg)](https://godoc.org/github.com/goravel/file-rotatelogs)
+[![Release](https://img.shields.io/github/release/goravel/file-rotatelogs.svg)](https://github.com/goravel/file-rotatelogs/releases)
+[![Test](https://github.com/goravel/file-rotatelogs/actions/workflows/test.yml/badge.svg)](https://github.com/goravel/file-rotatelogs/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/goravel/file-rotatelogs)](https://goreportcard.com/report/github.com/goravel/file-rotatelogs)
+[![License](https://img.shields.io/github/license/goravel/file-rotatelogs)](https://img.shields.io/github/license/goravel/file-rotatelogs)
 
-[![GoDoc](https://godoc.org/github.com/lestrrat-go/file-rotatelogs?status.svg)](https://godoc.org/github.com/lestrrat-go/file-rotatelogs)
 
 # SYNOPSIS
 
@@ -17,7 +20,7 @@ import (
   "net/http"
 
   apachelog "github.com/lestrrat-go/apache-logformat"
-  rotatelogs "github.com/goravel/file-rotatelogs"
+  rotatelogs "github.com/goravel/file-rotatelogs/v2"
 )
 
 func main() {
@@ -61,7 +64,7 @@ such as `github.com/lestrrat-go/apache-logformat`.
 ```go
 import(
   "log"
-  "github.com/goravel/file-rotatelogs"
+  "github.com/goravel/file-rotatelogs/v2"
 )
 
 func main() {

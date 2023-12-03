@@ -3,7 +3,7 @@ package rotatelogs
 import (
 	"time"
 
-	"github.com/goravel/file-rotatelogs/internal/option"
+	"github.com/goravel/file-rotatelogs/v2/option"
 )
 
 const (

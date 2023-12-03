@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	strftime "github.com/lestrrat-go/strftime"
+	"github.com/goravel/file-rotatelogs/v2/strftime"
 )
 
 type Handler interface {
@@ -64,6 +64,10 @@ var UTC = clockFn(func() time.Time { return time.Now().UTC() })
 // Local is an object satisfying the Clock interface, which
 // returns the current time in the local timezone
 var Local = clockFn(time.Now)
+
+func NewClock(t time.Time) Clock {
+	return clockFn(func() time.Time { return t })
+}
 
 // Option is used to pass optional arguments to
 // the RotateLogs constructor
