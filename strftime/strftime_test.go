@@ -7,9 +7,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/goravel/file-rotatelogs/v2/strftime"
 	"github.com/lestrrat-go/envload"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/goravel/file-rotatelogs/v2/strftime"
 )
 
 var ref = time.Unix(1136239445, 123456789).UTC()
@@ -44,9 +45,8 @@ func TestInvalid(t *testing.T) {
 
 func TestFormatMethods(t *testing.T) {
 	l := envload.New()
-	defer l.Restore()
 
-	os.Setenv("LC_ALL", "C")
+	assert.NoError(t, os.Setenv("LC_ALL", "C"))
 
 	formatString := `%A %a %B %b %C %c %D %d %e %F %H %h %I %j %k %l %M %m %n %p %R %r %S %T %t %U %u %V %v %W %w %X %x %Y %y %Z %z`
 	resultString := "Monday Mon January Jan 20 Mon Jan  2 22:04:05 2006 01/02/06 02  2 2006-01-02 22 Jan 10 002 22 10 04 01 \n PM 22:04 10:04:05 PM 05 22:04:05 \t 01 1 01  2-Jan-2006 01 1 22:04:05 01/02/06 2006 06 UTC +0000"
@@ -96,13 +96,13 @@ func TestFormatMethods(t *testing.T) {
 		return
 	}
 
+	assert.NoError(t, l.Restore())
 }
 
 func TestFormatBlanks(t *testing.T) {
 	l := envload.New()
-	defer l.Restore()
 
-	os.Setenv("LC_ALL", "C")
+	assert.NoError(t, os.Setenv("LC_ALL", "C"))
 
 	{
 		dt := time.Date(1, 1, 1, 18, 0, 0, 0, time.UTC)
@@ -126,13 +126,14 @@ func TestFormatBlanks(t *testing.T) {
 			return
 		}
 	}
+
+	assert.NoError(t, l.Restore())
 }
 
 func TestFormatZeropad(t *testing.T) {
 	l := envload.New()
-	defer l.Restore()
 
-	os.Setenv("LC_ALL", "C")
+	assert.NoError(t, os.Setenv("LC_ALL", "C"))
 
 	{
 		dt := time.Date(1, 1, 1, 1, 0, 0, 0, time.UTC)
@@ -178,6 +179,8 @@ func TestFormatZeropad(t *testing.T) {
 			return
 		}
 	}
+
+	assert.NoError(t, l.Restore())
 }
 
 func TestGHIssue5(t *testing.T) {
@@ -221,22 +224,34 @@ func ExampleSpecificationSet() {
 		// I want %L as milliseconds!
 		p, err := strftime.New(`%L`, strftime.WithMilliseconds('L'))
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println(err.Error())
 			return
 		}
-		p.Format(os.Stdout, ref)
-		os.Stdout.Write([]byte{'\n'})
+		if err = p.Format(os.Stdout, ref); err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		if _, err = os.Stdout.Write([]byte{'\n'}); err != nil {
+			fmt.Println(err.Error())
+			return
+		}
 	}
 
 	{
 		// I want %f as milliseconds!
 		p, err := strftime.New(`%f`, strftime.WithMilliseconds('f'))
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println(err.Error())
 			return
 		}
-		p.Format(os.Stdout, ref)
-		os.Stdout.Write([]byte{'\n'})
+		if err = p.Format(os.Stdout, ref); err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		if _, err = os.Stdout.Write([]byte{'\n'}); err != nil {
+			fmt.Println(err.Error())
+			return
+		}
 	}
 
 	{
@@ -247,8 +262,14 @@ func ExampleSpecificationSet() {
 			fmt.Println(err)
 			return
 		}
-		p.Format(os.Stdout, ref)
-		os.Stdout.Write([]byte{'\n'})
+		if err = p.Format(os.Stdout, ref); err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		if _, err = os.Stdout.Write([]byte{'\n'}); err != nil {
+			fmt.Println(err.Error())
+			return
+		}
 	}
 
 	{
@@ -256,14 +277,23 @@ func ExampleSpecificationSet() {
 		a := strftime.Verbatim(`Daisuke Maki`)
 
 		ds := strftime.NewSpecificationSet()
-		ds.Set('X', a)
-		p, err := strftime.New(`%X`, strftime.WithSpecificationSet(ds))
-		if err != nil {
-			fmt.Println(err)
+		if err := ds.Set('X', a); err != nil {
+			fmt.Println(err.Error())
 			return
 		}
-		p.Format(os.Stdout, ref)
-		os.Stdout.Write([]byte{'\n'})
+		p, err := strftime.New(`%X`, strftime.WithSpecificationSet(ds))
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		if err = p.Format(os.Stdout, ref); err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		if _, err = os.Stdout.Write([]byte{'\n'}); err != nil {
+			fmt.Println(err.Error())
+			return
+		}
 	}
 
 	{
@@ -273,8 +303,14 @@ func ExampleSpecificationSet() {
 			fmt.Println(err)
 			return
 		}
-		p.Format(os.Stdout, ref)
-		os.Stdout.Write([]byte{'\n'})
+		if err = p.Format(os.Stdout, ref); err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		if _, err = os.Stdout.Write([]byte{'\n'}); err != nil {
+			fmt.Println(err.Error())
+			return
+		}
 	}
 
 	// OUTPUT:
@@ -291,7 +327,7 @@ func TestGHIssue9(t *testing.T) {
 	correctString := "/full1/test2/to3/proveIssue9isfixed/112022/1234520200101.01.log.20.log"
 
 	var buf bytes.Buffer
-	pattern.Format(&buf, testTime)
+	assert.NoError(t, pattern.Format(&buf, testTime))
 
 	// Using a fixed time should give us a fixed output.
 	if !assert.True(t, buf.String() == correctString) {
@@ -326,7 +362,7 @@ func TestGHIssue18(t *testing.T) {
 
 				buf.Reset()
 
-				pattern.Format(&buf, testTime)
+				assert.NoError(t, pattern.Format(&buf, testTime))
 				if !assert.Equal(t, correctString, buf.String(), "Buffer [%s] should be [%s] for time %s", buf.String(), correctString, testTime) {
 					return
 				}
@@ -356,7 +392,7 @@ func TestGHIssue18(t *testing.T) {
 			buf.Reset()
 
 			t.Logf("%s", correctString)
-			pattern.Format(&buf, testTime)
+			assert.NoError(t, pattern.Format(&buf, testTime))
 			if !assert.Equal(t, correctString, buf.String(), "Buffer [%s] should be [%s] for time %s", buf.String(), correctString, testTime) {
 				continue
 			}

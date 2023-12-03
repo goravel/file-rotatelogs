@@ -26,7 +26,7 @@ func TestWriteLog(t *testing.T) {
 
 func TestWriteLogWhenRotateFile(t *testing.T) {
 	rl, _ := New("test.log", WithMaxAge(24*time.Hour), WithRotationTime(1*time.Hour))
-	rl.Rotate()
+	assert.NoError(t, rl.Rotate())
 	n, err := rl.Write([]byte("test log"))
 	assert.NoError(t, err)
 	assert.Equal(t, 8, n)
