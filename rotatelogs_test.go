@@ -138,7 +138,17 @@ func TestLogRotate(t *testing.T) {
 				t.Errorf("Failed to chtime for %s (expected %s, got %s)", fn, fi.ModTime(), dummyTime)
 			}
 
+			assert.NoError(t, rl.Close())
 			clock = NewClock(dummyTime.Add(7 * 24 * time.Hour))
+			options = []Option{WithClock(clock), WithMaxAge(24 * time.Hour)}
+			if fn := tc.FixArgs; fn != nil {
+				options = fn(options, dir)
+			}
+
+			rl, err = New(filepath.Join(dir, "log%Y%m%d%H%M%S"), options...)
+			if !assert.NoError(t, err, `New should succeed`) {
+				return
+			}
 
 			// This next Write() should trigger Rotate()
 			_, _ = rl.Write([]byte(str))
