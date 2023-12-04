@@ -223,16 +223,13 @@ func TestLogRotationCount(t *testing.T) {
 	})
 
 	t.Run("Either maxAge or rotationCount should be set", func(t *testing.T) {
-		rl, err := New(
+		_, err := New(
 			filepath.Join(dir, "log%Y%m%d%H%M%S"),
 			WithClock(clock),
 			WithMaxAge(1),
 			WithRotationCount(1),
 		)
-		if !assert.Error(t, err, `Both of maxAge and rotationCount is enabled`) {
-			return
-		}
-		assert.NoError(t, rl.Close())
+		assert.Error(t, err, `Both of maxAge and rotationCount is enabled`)
 	})
 
 	t.Run("Only latest log file is kept", func(t *testing.T) {
