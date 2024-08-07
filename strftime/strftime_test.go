@@ -187,7 +187,12 @@ func TestGHIssue5(t *testing.T) {
 	const expected = `apm-test/logs/apm.log.01000101`
 	p, _ := strftime.New("apm-test/logs/apm.log.%Y%m%d")
 	dt := time.Date(100, 1, 1, 1, 0, 0, 0, time.UTC)
-	if !assert.Equal(t, expected, p.FormatString(dt), `patterns including 'pm' should be treated as verbatim formatter`) {
+	if !assert.Equal(
+		t,
+		expected,
+		p.FormatString(dt),
+		`patterns including 'pm' should be treated as verbatim formatter`,
+	) {
 		return
 	}
 }
@@ -363,7 +368,15 @@ func TestGHIssue18(t *testing.T) {
 				buf.Reset()
 
 				assert.NoError(t, pattern.Format(&buf, testTime))
-				if !assert.Equal(t, correctString, buf.String(), "Buffer [%s] should be [%s] for time %s", buf.String(), correctString, testTime) {
+				if !assert.Equal(
+					t,
+					correctString,
+					buf.String(),
+					"Buffer [%s] should be [%s] for time %s",
+					buf.String(),
+					correctString,
+					testTime,
+				) {
 					return
 				}
 			}
@@ -393,7 +406,15 @@ func TestGHIssue18(t *testing.T) {
 
 			t.Logf("%s", correctString)
 			assert.NoError(t, pattern.Format(&buf, testTime))
-			if !assert.Equal(t, correctString, buf.String(), "Buffer [%s] should be [%s] for time %s", buf.String(), correctString, testTime) {
+			if !assert.Equal(
+				t,
+				correctString,
+				buf.String(),
+				"Buffer [%s] should be [%s] for time %s",
+				buf.String(),
+				correctString,
+				testTime,
+			) {
 				continue
 			}
 		}

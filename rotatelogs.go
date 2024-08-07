@@ -43,6 +43,7 @@ func New(p string, options ...Option) (*RotateLogs, error) {
 	var maxAge time.Duration
 	var handler Handler
 	var forceNewFile bool
+	var timeBased bool
 
 	for _, o := range options {
 		switch o.Name() {
@@ -71,6 +72,8 @@ func New(p string, options ...Option) (*RotateLogs, error) {
 			handler = o.Value().(Handler)
 		case optkeyForceNewFile:
 			forceNewFile = true
+		case optkeyTimeBased:
+			timeBased = true
 		}
 	}
 
@@ -81,6 +84,15 @@ func New(p string, options ...Option) (*RotateLogs, error) {
 	if maxAge == 0 && rotationCount == 0 {
 		// if both are 0, give maxAge a sane default
 		maxAge = 7 * 24 * time.Hour
+	}
+
+	if timeBased &&
+		(!strings.Contains(pattern.Pattern(), "%H") ||
+			!strings.Contains(pattern.Pattern(), "%M") ||
+			!strings.Contains(pattern.Pattern(), "%S")) {
+		return nil, errors.New(
+			"option timeBased should not be set if the log pattern doesn't contains %H, %M and %S",
+		)
 	}
 
 	return &RotateLogs{
@@ -94,6 +106,7 @@ func New(p string, options ...Option) (*RotateLogs, error) {
 		rotationSize:  rotationSize,
 		rotationCount: rotationCount,
 		forceNewFile:  forceNewFile,
+		timeBased:     timeBased,
 	}, nil
 }
 
@@ -122,7 +135,13 @@ func (rl *RotateLogs) getWriterNolock(bailOnRotateFail, useGenerationalNames boo
 	// This filename contains the name of the "NEW" filename
 	// to log to, which may be newer than rl.currentFilename
 	baseFn := GenerateFn(rl.pattern, rl.clock, rl.rotationTime)
-	filename := baseFn
+	var filename string
+	if rl.timeBased {
+		filename = GenerateNowFn(rl.pattern, rl.clock)
+	} else {
+		filename = baseFn
+	}
+
 	var forceNewFile bool
 
 	fi, err := os.Stat(rl.curFn)
@@ -145,15 +164,21 @@ func (rl *RotateLogs) getWriterNolock(bailOnRotateFail, useGenerationalNames boo
 			return rl.outFh, nil
 		}
 		forceNewFile = true
-		generation++
+		if !rl.timeBased {
+			generation++
+		}
 	}
 	if forceNewFile {
 		// A new file has been requested. Instead of just using the
 		// regular strftime pattern, we create a new file name using
 		// generational names such as "foo.1", "foo.2", "foo.3", etc
+
+		// If the timeBased is enabled, we have fairly high
+		// probability of knowing the generator GenerateNowFn will
+		// return an noredundant filename.
 		var name string
 		for {
-			if generation == 0 {
+			if rl.timeBased || generation == 0 {
 				name = filename
 			} else {
 				name = fmt.Sprintf("%s.%d", filename, generation)
@@ -163,7 +188,11 @@ func (rl *RotateLogs) getWriterNolock(bailOnRotateFail, useGenerationalNames boo
 
 				break
 			}
-			generation++
+			if rl.timeBased {
+				filename = GenerateNowFn(rl.pattern, rl.clock)
+			} else {
+				generation++
+			}
 		}
 	}
 

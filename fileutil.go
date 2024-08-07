@@ -29,14 +29,38 @@ func GenerateFn(pattern *strftime.Strftime, clock interface{ Now() time.Time }, 
 	// the local zone
 	var base time.Time
 	if now.Location() != time.UTC {
-		base = time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second(), now.Nanosecond(), time.UTC)
+		base = time.Date(
+			now.Year(),
+			now.Month(),
+			now.Day(),
+			now.Hour(),
+			now.Minute(),
+			now.Second(),
+			now.Nanosecond(),
+			time.UTC,
+		)
 		base = base.Truncate(rotationTime)
-		base = time.Date(base.Year(), base.Month(), base.Day(), base.Hour(), base.Minute(), base.Second(), base.Nanosecond(), base.Location())
+		base = time.Date(
+			base.Year(),
+			base.Month(),
+			base.Day(),
+			base.Hour(),
+			base.Minute(),
+			base.Second(),
+			base.Nanosecond(),
+			base.Location(),
+		)
 	} else {
 		base = now.Truncate(rotationTime)
 	}
 
 	return pattern.FormatString(base)
+}
+
+// GenerateNowFn creates a file name based on the pattern and the current time.
+func GenerateNowFn(pattern *strftime.Strftime, clock interface{ Now() time.Time }) string {
+	now := clock.Now()
+	return pattern.FormatString(now)
 }
 
 // CreateFile creates a new file in the given path, creating parent directories

@@ -51,7 +51,14 @@ func TestLogRotate(t *testing.T) {
 				expectedLinkDest := filepath.Base(rl.CurrentFileName())
 				t.Logf("expecting relative link: %s", expectedLinkDest)
 
-				return assert.Equal(t, linkDest, expectedLinkDest, `Symlink destination should  match expected filename (%#v != %#v)`, expectedLinkDest, linkDest)
+				return assert.Equal(
+					t,
+					linkDest,
+					expectedLinkDest,
+					`Symlink destination should  match expected filename (%#v != %#v)`,
+					expectedLinkDest,
+					linkDest,
+				)
 			},
 		},
 		{
@@ -71,7 +78,14 @@ func TestLogRotate(t *testing.T) {
 				expectedLinkDest := filepath.Join("..", "..", filepath.Base(rl.CurrentFileName()))
 				t.Logf("expecting relative link: %s", expectedLinkDest)
 
-				return assert.Equal(t, linkDest, expectedLinkDest, `Symlink destination should  match expected filename (%#v != %#v)`, expectedLinkDest, linkDest)
+				return assert.Equal(
+					t,
+					linkDest,
+					expectedLinkDest,
+					`Symlink destination should  match expected filename (%#v != %#v)`,
+					expectedLinkDest,
+					linkDest,
+				)
 			},
 		},
 	}
@@ -337,7 +351,7 @@ func TestGHIssue16(t *testing.T) {
 
 	rl, err := New(
 		filepath.Join(dir, "log%Y%m%d%H%M%S"),
-		WithLinkName("./test.log"),
+		WithLinkName(filepath.Join(dir, "test.log")),
 		WithRotationTime(10*time.Second),
 		WithRotationCount(3),
 		WithMaxAge(-1),
@@ -379,7 +393,11 @@ func TestRotationGenerationalNames(t *testing.T) {
 			// and the previous files already exist, the filenames should share
 			// the same prefix and have a unique suffix
 			fn := filepath.Base(rl.CurrentFileName())
-			if !assert.True(t, strings.HasPrefix(fn, "unchanged-pattern.log"), "prefix for all filenames should match") {
+			if !assert.True(
+				t,
+				strings.HasPrefix(fn, "unchanged-pattern.log"),
+				"prefix for all filenames should match",
+			) {
 				return
 			}
 			_, _ = rl.Write([]byte("Hello, World!"))
@@ -391,7 +409,13 @@ func TestRotationGenerationalNames(t *testing.T) {
 			assert.FileExists(t, rl.CurrentFileName(), "file does not exist %s", rl.CurrentFileName())
 			stat, err := os.Stat(rl.CurrentFileName())
 			if err == nil {
-				if !assert.True(t, stat.Size() == 13, "file %s size is %d, expected 13", rl.CurrentFileName(), stat.Size()) {
+				if !assert.True(
+					t,
+					stat.Size() == 13,
+					"file %s size is %d, expected 13",
+					rl.CurrentFileName(),
+					stat.Size(),
+				) {
 					return
 				}
 			} else {
@@ -457,13 +481,19 @@ func TestGHIssue23(t *testing.T) {
 			Clock    Clock
 		}{
 			{
-				Expected: filepath.Join(dir, strings.ToLower(strings.Replace(locName, "/", "_", -1))+".201806010000.log"),
+				Expected: filepath.Join(
+					dir,
+					strings.ToLower(strings.Replace(locName, "/", "_", -1))+".201806010000.log",
+				),
 				Clock: ClockFunc(func() time.Time {
 					return time.Date(2018, 6, 1, 3, 18, 0, 0, loc)
 				}),
 			},
 			{
-				Expected: filepath.Join(dir, strings.ToLower(strings.Replace(locName, "/", "_", -1))+".201712310000.log"),
+				Expected: filepath.Join(
+					dir,
+					strings.ToLower(strings.Replace(locName, "/", "_", -1))+".201712310000.log",
+				),
 				Clock: ClockFunc(func() time.Time {
 					return time.Date(2017, 12, 31, 23, 52, 0, 0, loc)
 				}),
@@ -471,22 +501,25 @@ func TestGHIssue23(t *testing.T) {
 		}
 		for _, test := range tests {
 			test := test
-			t.Run(fmt.Sprintf("location = %s, time = %s", locName, test.Clock.Now().Format(time.RFC3339)), func(t *testing.T) {
-				template := strings.ToLower(strings.Replace(locName, "/", "_", -1)) + ".%Y%m%d%H%M.log"
-				rl, err := New(
-					filepath.Join(dir, template),
-					WithClock(test.Clock), // we're not using WithLocation, but it's the same thing
-				)
-				if !assert.NoError(t, err, "New should succeed") {
-					return
-				}
+			t.Run(
+				fmt.Sprintf("location = %s, time = %s", locName, test.Clock.Now().Format(time.RFC3339)),
+				func(t *testing.T) {
+					template := strings.ToLower(strings.Replace(locName, "/", "_", -1)) + ".%Y%m%d%H%M.log"
+					rl, err := New(
+						filepath.Join(dir, template),
+						WithClock(test.Clock), // we're not using WithLocation, but it's the same thing
+					)
+					if !assert.NoError(t, err, "New should succeed") {
+						return
+					}
 
-				t.Logf("expected %s", test.Expected)
-				assert.NoError(t, rl.Rotate())
-				if !assert.Equal(t, test.Expected, rl.CurrentFileName(), "file names should match") {
-					return
-				}
-			})
+					t.Logf("expected %s", test.Expected)
+					assert.NoError(t, rl.Rotate())
+					if !assert.Equal(t, test.Expected, rl.CurrentFileName(), "file names should match") {
+						return
+					}
+				},
+			)
 		}
 	}
 
@@ -535,7 +568,15 @@ func TestForceNewFile(t *testing.T) {
 				return
 			}
 			str := fmt.Sprintf("Hello, World%d", i)
-			if !assert.Equal(t, str, string(content), "read %s from file %s, not expected %s", string(content), rl.CurrentFileName(), str) {
+			if !assert.Equal(
+				t,
+				str,
+				string(content),
+				"read %s from file %s, not expected %s",
+				string(content),
+				rl.CurrentFileName(),
+				str,
+			) {
 				return
 			}
 
@@ -544,7 +585,14 @@ func TestForceNewFile(t *testing.T) {
 			if !assert.NoError(t, err, "os.ReadFile should succeed") {
 				return
 			}
-			if !assert.Equal(t, "Hello, World!", string(content), "read %s from file %s, not expected Hello, World!", string(content), baseFn) {
+			if !assert.Equal(
+				t,
+				"Hello, World!",
+				string(content),
+				"read %s from file %s, not expected Hello, World!",
+				string(content),
+				baseFn,
+			) {
 				return
 			}
 		}
@@ -573,7 +621,15 @@ func TestForceNewFile(t *testing.T) {
 				return
 			}
 			str := fmt.Sprintf("Hello, World%d", i)
-			if !assert.Equal(t, str, string(content), "read %s from file %s, not expected %s", string(content), rl.CurrentFileName(), str) {
+			if !assert.Equal(
+				t,
+				str,
+				string(content),
+				"read %s from file %s, not expected %s",
+				string(content),
+				rl.CurrentFileName(),
+				str,
+			) {
 				return
 			}
 
@@ -582,7 +638,133 @@ func TestForceNewFile(t *testing.T) {
 			if !assert.NoError(t, err, "os.ReadFile should succeed") {
 				return
 			}
-			if !assert.Equal(t, "Hello, World!", string(content), "read %s from file %s, not expected Hello, World!", string(content), baseFn) {
+			if !assert.Equal(
+				t,
+				"Hello, World!",
+				string(content),
+				"read %s from file %s, not expected Hello, World!",
+				string(content),
+				baseFn,
+			) {
+				return
+			}
+		}
+	})
+
+	assert.NoError(t, os.RemoveAll(dir))
+}
+
+func TestTimeBased(t *testing.T) {
+	dir, err := os.MkdirTemp("", "file-rotatelogs-time-based")
+	if !assert.NoError(t, err, `creating temporary directory should succeed`) {
+		return
+	}
+
+	loc, _ := time.LoadLocation("Asia/Tokyo")
+	date := time.Date(2024, 8, 6, 16, 42, 22, 0, loc)
+	clock := ClockFunc(func() time.Time {
+		return date
+	})
+
+	t.Run("Force a new file", func(t *testing.T) {
+
+		_, err := New(
+			filepath.Join(dir, "force-new-file.log"),
+			TimeBased(),
+			WithClock(clock),
+		)
+		assert.Error(t, err)
+
+		rl, err := New(
+			filepath.Join(dir, "force-new-file.log.%H%M%S"),
+			TimeBased(),
+			WithClock(clock),
+		)
+		if !assert.NoError(t, err, "New should succeed") {
+			return
+		}
+		_, _ = rl.Write([]byte("Hello, World!"))
+		_ = rl.Close()
+		date = date.Add(time.Second)
+		for i := 0; i < 10; i++ {
+			baseFn := filepath.Join(dir, "force-new-file.log.%H%M%S")
+			if !assert.NoError(t, err, "strftime pattern failed") {
+				return
+			}
+			rl, err := New(
+				baseFn,
+				TimeBased(),
+				WithClock(clock),
+			)
+			if !assert.NoError(t, err, "New should succeed") {
+				return
+			}
+			_, _ = rl.Write([]byte("Hello, World"))
+			_, _ = rl.Write([]byte(fmt.Sprintf("%d", i)))
+			_ = rl.Close()
+
+			fn := filepath.Base(rl.CurrentFileName())
+			suffix := strings.TrimPrefix(fn, "force-new-file.log")
+			expectedSuffix := fmt.Sprintf(".%d", 164223+i) // 16:42:23
+			if !assert.True(t, suffix == expectedSuffix, "expected suffix %s found %s", expectedSuffix, suffix) {
+				return
+			}
+			assert.FileExists(t, rl.CurrentFileName(), "file does not exist %s", rl.CurrentFileName())
+			content, err := os.ReadFile(rl.CurrentFileName())
+			if !assert.NoError(t, err, "os.ReadFile %s should succeed", rl.CurrentFileName()) {
+				return
+			}
+			str := fmt.Sprintf("Hello, World%d", i)
+			if !assert.Equal(
+				t,
+				str,
+				string(content),
+				"read %s from file %s, not expected %s",
+				string(content),
+				rl.CurrentFileName(),
+				str,
+			) {
+				return
+			}
+			date = date.Add(time.Second)
+		}
+	})
+
+	t.Run("Force a new file with Rotate", func(t *testing.T) {
+		baseFn := filepath.Join(dir, "force-new-file.log.%H%M%S")
+		rl, err := New(
+			baseFn,
+			TimeBased(),
+			WithClock(clock),
+		)
+		if !assert.NoError(t, err, "New should succeed") {
+			return
+		}
+		_, _ = rl.Write([]byte("Hello, World!"))
+
+		// start with 16:42:33
+		for i := 0; i < 10; i++ {
+			date = date.Add(time.Second)
+			if !assert.NoError(t, rl.Rotate(), "rl.Rotate should succeed") {
+				return
+			}
+			_, _ = rl.Write([]byte("Hello, World"))
+			_, _ = rl.Write([]byte(fmt.Sprintf("%d", i)))
+			assert.FileExists(t, rl.CurrentFileName(), "file does not exist %s", rl.CurrentFileName())
+			content, err := os.ReadFile(rl.CurrentFileName())
+			if !assert.NoError(t, err, "os.ReadFile %s should succeed", rl.CurrentFileName()) {
+				return
+			}
+			str := fmt.Sprintf("Hello, World%d", i)
+			if !assert.Equal(
+				t,
+				str,
+				string(content),
+				"read %s from file %s, not expected %s",
+				string(content),
+				rl.CurrentFileName(),
+				str,
+			) {
 				return
 			}
 		}

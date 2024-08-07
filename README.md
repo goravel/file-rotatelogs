@@ -211,6 +211,21 @@ already exists, an implicit rotation is performed.
   )
 ```
 
+## TimeBased
+
+The filename pattern should include `%H`, `%M` and `%S`. The suffix .1 .2 .3, etc,.
+would be omitted.
+
+```go
+  rotatelogs.New(
+    "/var/log/myapp/log.%Y%m%d-%H%M%S",
+    rotatelogs.TimeBased(),
+  )
+```
+
+The filename of log file would be: `/var/log/myapp/log.20240806-080523`,
+ `/var/log/myapp/log.20240806-092159`...
+
 # Rotating files forcefully
 
 If you want to rotate files forcefully before the actual rotation time has reached,
